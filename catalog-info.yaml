@@ -1,0 +1,178 @@
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: legacy-monolith
+  description: The original RedKnot monolith (api/core/web modules). Decomposition planned for Q3 2025 — see JIRA-4521.
+  annotations:
+    backstage.io/source-location: url:https://github.com/codecargo-demo-internal/jenkins-legacy-monolith-java/
+  tags:
+    - legacy
+    - monolith
+spec:
+  owner: group:team-legacy
+  domain: platform-engineering
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: redknot-monolith
+  description: Multi-module Spring Boot monolith (Maven, Java 21). DO NOT modify the build without talking to @garcia.
+  annotations:
+    github.com/project-slug: codecargo-demo-internal/jenkins-legacy-monolith-java
+    backstage.io/source-location: url:https://github.com/codecargo-demo-internal/jenkins-legacy-monolith-java/
+    backstage.io/techdocs-ref: dir:.
+    backstage.io/kubernetes-id: redknot-monolith
+    jenkins.io/job-full-name: Legacy/monolith-build
+    sonarqube.org/project-key: redknot-monolith
+  tags:
+    - java
+    - spring-boot
+    - maven
+    - legacy
+  links:
+    - url: https://github.com/codecargo-demo-internal/jenkins-legacy-monolith-java/
+      title: Source
+      icon: github
+spec:
+  type: service
+  lifecycle: deprecated
+  owner: group:team-legacy
+  system: legacy-monolith
+  providesApis:
+    - monolith-api
+  dependsOn:
+    - resource:monolith-db
+    - resource:monolith-session-store
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: monolith-api-module
+  description: API module of the monolith (com.redknot.api).
+  annotations:
+    backstage.io/source-location: url:https://github.com/codecargo-demo-internal/jenkins-legacy-monolith-java/tree/main/api/
+  tags:
+    - java
+    - module
+spec:
+  type: service
+  lifecycle: deprecated
+  owner: group:team-legacy
+  system: legacy-monolith
+  subcomponentOf: redknot-monolith
+  providesApis:
+    - monolith-api
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: monolith-core-module
+  description: Core domain/services module of the monolith (com.redknot.core).
+  annotations:
+    backstage.io/source-location: url:https://github.com/codecargo-demo-internal/jenkins-legacy-monolith-java/tree/main/core/
+  tags:
+    - java
+    - module
+spec:
+  type: library
+  lifecycle: deprecated
+  owner: group:team-legacy
+  system: legacy-monolith
+  subcomponentOf: redknot-monolith
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: monolith-web-module
+  description: Server-rendered web UI module of the monolith (com.redknot.web).
+  annotations:
+    backstage.io/source-location: url:https://github.com/codecargo-demo-internal/jenkins-legacy-monolith-java/tree/main/web/
+  tags:
+    - java
+    - web
+    - module
+spec:
+  type: website
+  lifecycle: deprecated
+  owner: group:team-legacy
+  system: legacy-monolith
+  subcomponentOf: redknot-monolith
+---
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: monolith-api
+  description: Legacy HTTP API exposed by the monolith api module.
+  tags:
+    - openapi
+    - legacy
+spec:
+  type: openapi
+  lifecycle: deprecated
+  owner: group:team-legacy
+  system: legacy-monolith
+  definition: |
+    openapi: 3.0.3
+    info:
+      title: Monolith Legacy API
+      version: 3.14.2
+    paths:
+      /api/status:
+        get:
+          summary: Legacy status endpoint
+          responses:
+            '200': { description: OK }
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: monolith-db
+  description: "[demo/invented] Primary relational database for the legacy monolith."
+  tags:
+    - database
+    - legacy
+    - invented
+spec:
+  type: database
+  owner: group:team-legacy
+  system: legacy-monolith
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: monolith-session-store
+  description: "[demo/invented] Server-side HTTP session store for the monolith web module."
+  tags:
+    - cache
+    - legacy
+    - invented
+spec:
+  type: cache
+  owner: group:team-legacy
+  system: legacy-monolith
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: team-legacy
+  description: Maintains the legacy monolith and drives its decomposition.
+spec:
+  type: team
+  profile:
+    displayName: Legacy Support Team
+    email: legacy-support@redknot-enterprises.com
+  parent: engineering
+  children: []
+  members:
+    - garcia
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: garcia
+spec:
+  profile:
+    displayName: Miguel Garcia
+    email: miguel.garcia@redknot-enterprises.com
+  memberOf:
+    - team-legacy
